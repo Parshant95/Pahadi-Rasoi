@@ -1,0 +1,50 @@
+/* src/input.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.header{
+
+    display: flex;
+    justify-content: space-between;
+    
+    
+}
+.logo img{
+    width: 100px;
+    border-radius: 20px;
+   
+}
+.nav-item>ul{
+    display: flex;
+    width: 100%;
+}
+.nav-item>ul>li{
+    list-style: none;
+    font-size: 20px;
+    margin: 10px;
+    font-weight: 600;
+    color: #000;
+}
+.search{
+    padding: 10px;
+}
+.rescont{
+    display: flex;
+    flex-wrap: wrap;
+}
+.rescard{
+    margin: 5px;
+    background-color: rgb(220, 220, 220);
+    padding: 6px;
+    height: 300px;
+    width: 200px;
+    
+}
+.rescard:hover{
+    cursor: pointer;
+    border: 2px solid black;
+}
+
+.reslogo{
+    width: 100%;
+}
