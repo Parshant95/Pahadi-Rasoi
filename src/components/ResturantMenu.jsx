@@ -15,7 +15,7 @@ const ResturantMenu = () => {
   const fetchMenu = async () => {
     try {
       const data = await fetch(
-        `https://www.swiggy.com/dapi/menu/pl?page-type=REGULAR_MENU&complete-menu=true&lat=21.99740&lng=79.00110&restaurantId=${resId}&catalog_qa=undefined&submitAction=ENTER`
+        `https://corsproxy.io/https://www.swiggy.com/dapi/menu/pl?page-type=REGULAR_MENU&complete-menu=true&lat=21.99740&lng=79.00110&restaurantId=${resId}&catalog_qa=undefined&submitAction=ENTER`
       );
       if (!data.ok) throw new Error("Failed to fetch menu");
       const json = await data.json();
