@@ -1,30 +1,96 @@
 import { useState, useEffect } from "react";
 import Shimmer from "./Shimmer";
-const Rescard = (props) => {
-  const { resObj } = props;
+import { Link } from "react-router-dom";
+
+const Rescard = ({ resObj }) => {
   return (
-    <div className="rescard">
-      <div className="reslogo">
+    <div
+      style={{
+        backgroundColor: "white",
+        borderRadius: "16px",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        overflow: "hidden",
+        transform: "scale(1)",
+        transition: "all 0.2s ease-in-out",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "scale(1.05)";
+        e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.15)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "scale(1)";
+        e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+      }}
+    >
+      {/* Image Section */}
+      <div style={{ position: "relative", width: "100%", height: "160px" }}>
         <img
-          src={resObj.image || ("https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_660/" + (resObj.cloudinaryImageId || ""))}
+          src={
+            resObj.image ||
+            ("https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_660/" +
+              (resObj.cloudinaryImageId || ""))
+          }
           alt={resObj.name}
-          className="card-image-style"
-          style={{ width: "200px", height: "150px", objectFit: "cover" }}
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
+        <span
+          style={{
+            position: "absolute",
+            bottom: "8px",
+            left: "8px",
+            backgroundColor: "green",
+            color: "white",
+            fontSize: "12px",
+            fontWeight: "600",
+            padding: "4px 8px",
+            borderRadius: "8px",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+          }}
+        >
+          ⭐ {resObj.rating || resObj.avgRating || "N/A"}
+        </span>
       </div>
-      <div className="resname">{resObj.name}</div>
-      <div className="resrating">Rating: {resObj.rating || resObj.avgRating}</div>
-      <div className="rescuisine">Cuisine: {Array.isArray(resObj.cuisine) ? resObj.cuisine.join(", ") : (resObj.cuisines ? resObj.cuisines.join(", ") : "")}</div>
+
+      {/* Text Section */}
+      <div style={{ padding: "12px" }}>
+        <h3
+          style={{
+            fontSize: "18px",
+            fontWeight: "bold",
+            color: "#1f2937",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            marginBottom: "4px",
+          }}
+        >
+          {resObj.name}
+        </h3>
+        <p
+          style={{
+            fontSize: "14px",
+            color: "#6b7280",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {Array.isArray(resObj.cuisine)
+            ? resObj.cuisine.join(", ")
+            : resObj.cuisines
+            ? resObj.cuisines.join(", ")
+            : "Various"}
+        </p>
+      </div>
     </div>
   );
 };
 
 const resObj = {
-  // ... (your mock data unchanged)
-  "status": "success",
-  "restaurants": [
-    // ... (your restaurant objects)
-  ]
+  status: "success",
+  restaurants: [
+    // mock restaurants here
+  ],
 };
 
 function Body() {
@@ -35,56 +101,93 @@ function Body() {
   }, []);
 
   const fetchData = async () => {
-    try {
-      const data = await fetch(
-        "https://corsproxy.io/https://www.swiggy.com/dapi/restaurants/list/v5?lat=21.99740&lng=79.00110&is-seo-homepage-enabled=true&page_type=DESKTOP_WEB_LISTING"
-      );
-      const json = await data.json();
-      console.log(json); // Inspect this in your browser console to find the correct path
-      
-      // Find the card with the restaurant grid and update the path
-      const restaurantCard = json?.data?.cards?.find(
-        (card) => card?.card?.card?.gridElements?.infoWithStyle?.restaurants
-      );
+  try {
+    const data = await fetch(
+      "https://corsproxy.io/https://www.swiggy.com/dapi/restaurants/list/v5?lat=21.99740&lng=79.00110&is-seo-homepage-enabled=true&page_type=DESKTOP_WEB_LISTING"
+    );
+    const json = await data.json();
+    console.log(json);
 
-      const apiRestaurants = restaurantCard?.card?.card?.gridElements?.infoWithStyle?.restaurants;
+    // Collect all cards containing restaurants
+    const restaurantCards = json?.data?.cards?.filter(
+      (card) => card?.card?.card?.gridElements?.infoWithStyle?.restaurants
+    );
 
-      if (apiRestaurants) {
-        // The actual restaurant data is in the `info` property of each item
-        setresData(apiRestaurants.map(r => r.info));
-      } else {
-        // If API fails or path is wrong, you can use your mock data
-        // Make sure resObj.restaurants is not empty
-        setresData(resObj.restaurants); 
-      }
-    } catch (e) {
-      // Fallback to mock data on network error
+    // Merge them into a single array
+    const apiRestaurants = restaurantCards.flatMap(
+      (card) => card.card.card.gridElements.infoWithStyle.restaurants
+    );
+
+    if (apiRestaurants?.length > 0) {
+      setresData(apiRestaurants.map((r) => r.info));
+    } else {
       setresData(resObj.restaurants);
     }
-  };
+  } catch (e) {
+    setresData(resObj.restaurants);
+  }
+};
 
   const handleTopRated = () => {
-    setresData(resData.filter(res =>
-      (res.rating || res.avgRating) >= 4.5
-    ));
+    setresData(resData.filter((res) => (res.rating || res.avgRating) >= 4.5));
   };
- 
 
-  if(resData.length === 0) {
+  if (resData.length === 0) {
     return <Shimmer />;
   }
 
-
   return (
-    <div className="body">
-      <div className="filter">
-        <button className="filter-btn" onClick={handleTopRated}>
-          Top Rated Restaurants
+    <div style={{ padding: "24px" }}>
+      {/* Filter Section */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "24px",
+        }}
+      >
+        <h2 style={{ fontSize: "24px", fontWeight: "bold", color: "#1f2937" , display: "flex", alignItems: "center", gap: "8px"}}>
+          Pahadi Rasoi
+        </h2>
+        <button
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "green",
+            color: "white",
+            borderRadius: "8px",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+            cursor: "pointer",
+            border: "none",
+            transition: "background-color 0.2s ease-in-out",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = "darkgreen")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = "green")
+          }
+          onClick={handleTopRated}
+        >
+          Top Rated
         </button>
       </div>
-      <div className="rescont">
+
+      {/* Restaurant Grid */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns:
+            "repeat(auto-fill, minmax(250px, 1fr))",
+          gap: "24px",
+        }}
+      >
         {resData.map((restaurant) => (
-          <Rescard key={restaurant.id} resObj={restaurant} />
+          <Link key={restaurant.id} to={"/restaurant/" + restaurant.id}
+          style={{ textDecoration: "none", color: "inherit" }}
+          >
+            <Rescard resObj={restaurant} />
+          </Link>
         ))}
       </div>
     </div>

@@ -6,23 +6,33 @@ import Body from './components/Body.jsx'
 import About from './components/About.jsx'
 import './index.css'
 import Contact from './components/Contact.jsx';
-
+import Error from './components/Error.jsx';
+import ResturantMenu from './components/ResturantMenu.jsx';
 const appRouter = createBrowserRouter([
   {
     path: "/",
     element: <AppLayout />,
     children: [
+      
       {
         path: "",
         element: <Body />, 
+        
+
       },
       {
-        path: "about",
+        path: "about", // removed leading slash
         element: <About />,
+        errorElement: <Error />,
       },
       {
-        path:"contact",
-        element:<Contact />,
+        path: "contact", // removed leading slash
+        element: <Contact />,
+      },
+      {
+        path:"restaurant/:resId",
+        element:<ResturantMenu/>,
+
       }
     ]
   }
